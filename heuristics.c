@@ -63,7 +63,7 @@ static int evaluate_sequence (int* sequence, int length, int* values) {
 
     } else {
         // P2 em vantagem
-        return values[p2_count - 1];
+        return -values[p2_count - 1];
     }
 }
 
@@ -90,4 +90,31 @@ int* generate_table (int seq_length, int* values) {
      }
 
      return table;
+}
+
+int evaluate_matrix (
+        int* board, 
+        int row_n, // número de linhas
+        int col_n, // número de colunas
+        int seq_length, 
+        int* table // tabela pré-calculada
+    ) {
+    /*
+     *  Calcula valor heurístico do tabuleiro em uma orientação.
+     *  Cada linha é um int, e cada peça tem 2 bits.
+     *  Num jogo 15x15 o int precisa apenas 30 bits, portanto int é suficiente.
+     */
+
+     int value = 0;
+     int max_offset = col_n - seq_length;
+     for (int row = 0; row < row_n; row++) {
+        for (int offset = 0; offset <= max_offset; offset++) {
+            int bitmask = (1 << offset) - 1;
+            int bits = (board[row] >> (max_offset - offset)) & bitmask;
+            to_add = table[bits];
+            if (to_add == INVALID) {
+                return INVALID;
+            }
+        }
+    }
 }
