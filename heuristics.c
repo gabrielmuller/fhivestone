@@ -21,6 +21,10 @@
  */
 
 static int* seq_to_array (seq bits, int length) {
+    /*
+     *  Dada uma sequência codificada em bits, retorna um array de inteiros,
+     *  onde cada inteiro é uma peça.
+     */
     int* array = malloc(sizeof(int) * length);
 
     for (int i = 0; i < length; i++) {
