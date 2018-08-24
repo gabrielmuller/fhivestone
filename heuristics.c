@@ -65,9 +65,13 @@ static int evaluate_sequence (int* sequence, int length, int* values) {
         // P1 em vantagem
         return values[p1_count - 1];
 
-    } else {
+    } else if (p2_count) {
         // P2 em vantagem
-        return values[p2_count - 1];
+        return -values[p2_count - 1];
+    } else {
+        // Não há peças
+        return 0;
+
     }
 }
 
