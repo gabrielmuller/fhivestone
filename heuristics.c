@@ -20,7 +20,7 @@
  *  é feito em tempo constante.
  */
 
-static int* bits_to_array (int bits, int length) {
+static int* seq_to_array (seq bits, int length) {
     int* array = malloc(sizeof(int) * length);
 
     for (int i = 0; i < length; i++) {
@@ -78,14 +78,13 @@ int* generate_table (int seq_length, int* values) {
      *  chamada uma vez e demora 1ms.
      */
 
-     int table_length = 1 << (seq_length * 2); // 2^(seq_length*2)
-     int* table = malloc(sizeof(int) * table_length);
+     int table_length = 1 << (seq_length * 2); // 2^(seq_length*2 bits)
+     int* table = malloc(sizeof(seq) * table_length);
 
      int space[seq_length];
-
             
-     for (int i = 0; i < table_length; i++) {
-        int* pieces = bits_to_array(i, seq_length);
+     for (seq i = 0; i < table_length; i++) {
+        int* pieces = seq_to_array(i, seq_length);
         table[i] = evaluate_sequence(pieces, seq_length, values);
      }
 
