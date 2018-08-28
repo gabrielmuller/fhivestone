@@ -60,18 +60,15 @@ static int evaluate_sequence (int* sequence, int length, int* values) {
     if (p1_count && p2_count) {
         // Há peças de ambos jogadores: ninguém pode ganhar
         return 0;
-
     } else if (p1_count) {
         // P1 em vantagem
         return values[p1_count - 1];
-
     } else if (p2_count) {
         // P2 em vantagem
         return -values[p2_count - 1];
     } else {
         // Não há peças
         return 0;
-
     }
 }
 
