@@ -4,5 +4,5 @@ all:
 
 debug:
 	gcc -g -O0 *.c -o five.o
-	gdb five.o
+	gdb five.o --tui
     

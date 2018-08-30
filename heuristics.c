@@ -10,7 +10,7 @@
  *  00: vazio            : _
  *  01: peça do jogador 1: O
  *  10: peça do jogador 2: X
- *  11: não usado
+ *  11: fora do tabuleiro
  *
  *  Uma sequência de 5 espaços pode ser codificada em um inteiro, que é usado
  *  para consultar a tabela de heurística.
@@ -20,11 +20,7 @@
  *  é feito em tempo constante.
  */
 
-static int* seq_to_array (seq bits, int length) {
-    /*
-     *  Dada uma sequência codificada em bits, retorna um array de inteiros,
-     *  onde cada inteiro é uma peça.
-     */
+static int* bits_to_array (row bits, int length) {
     int* array = malloc(sizeof(int) * length);
 
     for (int i = 0; i < length; i++) {
@@ -36,7 +32,7 @@ static int* seq_to_array (seq bits, int length) {
 
 static int evaluate_sequence (int* sequence, int length, int* values) {
     /*
-     * Calcula valor de uma sequência.
+     * Calcula valor de uma sequência de 5.
      * Usado para montar a tabela.
      */
 
@@ -46,8 +42,6 @@ static int evaluate_sequence (int* sequence, int length, int* values) {
     // Conta quantas peças de cada jogador
     for (int i = 0; i < length; i++) {
         switch (sequence[i]) {
-            case invalid:
-                return INVALID;
             case player1:
                 p1_count++;
                 break;
@@ -57,8 +51,8 @@ static int evaluate_sequence (int* sequence, int length, int* values) {
         }
     }
 
-    if (p1_count && p2_count) {
-        // Há peças de ambos jogadores: ninguém pode ganhar
+    if ((p1_count && p2_count) || (!p1_count && !p2_count)) {
+        //peça de ambos jogadores   nenhuma peça
         return 0;
 
     } else if (p1_count) {
@@ -68,32 +62,32 @@ static int evaluate_sequence (int* sequence, int length, int* values) {
     } else if (p2_count) {
         // P2 em vantagem
         return -values[p2_count - 1];
-    } else {
-        // Não há peças
-        return 0;
-
     }
 }
 
-int* generate_table (int seq_length, int* values) {
+int* generate_table (int small_length, int* values) {
     /*
-     *  seq_length: número de espaços (ex. 5)
-     *  values: array de tamanho [seq_length] que define o valor de
+     *  small_length: número de espaços (ex. 5)
+     *  values: array de tamanho [small_length] que define o valor de
      *  cada caso (1 peça, 2 peças, 3 peças...)
      *  Retorna tabela de heurística em um array de inteiros. 
      *
      *  A otimização dessa função não é muito importante, já que só será
-     *  chamada uma vez e demora 1ms.
+     *  chamada uma vez e demora ~10ms.
      */
 
-     int table_length = 1 << (seq_length * 2); // 2^(seq_length*2 bits)
-     int* table = malloc(sizeof(seq) * table_length);
+     // tamanho da fileira que uma jogada afeta em uma orientação (9)
+     int big_length = small_length * 2 - 1;
 
-     int space[seq_length];
-            
-     for (seq i = 0; i < table_length; i++) {
-        int* pieces = seq_to_array(i, seq_length);
-        table[i] = evaluate_sequence(pieces, seq_length, values);
+     int table_length = 1 << (big_length * 2); // 2^(big_length*2)
+     int* table = calloc(table_length, sizeof(int));
+
+     for (row big = 0; big < table_length; big++) {
+        for (int small_offset = 0; small_offset < small_length; small_offset++) {
+            int small = (big >> 2 * small_offset) & 0x3FF; // seleciona 5 espaços (10 bits) dos 9
+            int* pieces = bits_to_array(small, small_length);
+            table[big] += evaluate_sequence(pieces, small_length, values);
+        }
      }
 
      return table;
