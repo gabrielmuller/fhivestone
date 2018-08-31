@@ -20,7 +20,7 @@
  *  é feito em tempo constante.
  */
 
-static int* bits_to_array (row bits, int length) {
+static int* bits_to_array (row_t bits, int length) {
     int* array = malloc(sizeof(int) * length);
 
     for (int i = 0; i < length; i++) {
@@ -82,7 +82,7 @@ int* generate_table (int small_length, int* values) {
      int table_length = 1 << (big_length * 2); // 2^(big_length*2)
      int* table = calloc(table_length, sizeof(int));
 
-     for (row big = 0; big < table_length; big++) {
+     for (row_t big = 0; big < table_length; big++) {
         for (int small_offset = 0; small_offset < small_length; small_offset++) {
             int small = (big >> 2 * small_offset) & 0x3FF; // seleciona 5 espaços (10 bits) dos 9
             int* pieces = bits_to_array(small, small_length);
