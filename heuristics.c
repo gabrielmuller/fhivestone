@@ -73,7 +73,7 @@ int* generate_table (int small_length, int* values) {
      *  Retorna tabela de heurística em um array de inteiros. 
      *
      *  A otimização dessa função não é muito importante, já que só será
-     *  chamada uma vez e demora ~10ms.
+     *  chamada uma vez e demora ~100ms.
      */
 
      // tamanho da fileira que uma jogada afeta em uma orientação (9)
@@ -92,3 +92,4 @@ int* generate_table (int small_length, int* values) {
 
      return table;
 }
+

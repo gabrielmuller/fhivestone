@@ -1,3 +1,6 @@
+#ifndef HEURISTICS_H
+#define HEURISTICS_H
+
 #include <stdlib.h>
 #include "constants.h"
 
@@ -11,3 +14,5 @@ int evaluate_matrix (
         int seq_length, 
         int* table
     );
+
+#endif
