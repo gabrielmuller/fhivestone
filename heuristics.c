@@ -42,6 +42,8 @@ static int evaluate_sequence (int* sequence, int length, int* values) {
     // Conta quantas peças de cada jogador
     for (int i = 0; i < length; i++) {
         switch (sequence[i]) {
+            case offboard:
+                return 0;
             case player1:
                 p1_count++;
                 break;
