@@ -2,7 +2,7 @@
 #define HEURISTICS_H
 
 #include <stdlib.h>
-#include "constants.h"
+#include "util.h"
 
 static int* bits_to_array (row_t bits, int length);
 static int evaluate_sequence (int* sequence, int length, int* values);

@@ -14,7 +14,6 @@ int main (void) {
     play_board(board, 13, 14, 0x2);
     print_board(board);
     play_board(board, 14, 14, 0x1);
-    print_board(board);
 
     return 0;
 }

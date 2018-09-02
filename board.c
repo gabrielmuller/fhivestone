@@ -85,10 +85,6 @@ int play_orientation (row_t* row, int x, int y, int piece) {
      */
     return play_row(&row[y], x, piece);
 }
-    
-int min (int x, int y) {
-    return x < y ? x : y;
-}
 
 void play_board (Board* board, int x, int y, int piece) {
     /*
