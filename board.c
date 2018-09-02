@@ -21,8 +21,8 @@ Board* create_board (int size) {
 
     board->horizontal = calloc(size, sizeof(row_t));
     board->vertical   = calloc(size, sizeof(row_t));
-    board->descending = calloc(size*2 - 1, sizeof(row_t));
-    board->ascending  = calloc(size*2 - 1, sizeof(row_t));
+    board->descending = calloc((size - WIN_SIZE)*2 + 1, sizeof(row_t));
+    board->ascending  = calloc((size - WIN_SIZE)*2 + 1, sizeof(row_t));
     board->size = size;
     board->hval = 0;
 
@@ -39,7 +39,7 @@ int play_row (row_t* row, int pos, int piece) {
     int bitmask_size = WIN_SIZE * 2 - 1;
 
     if (shift < 0) {
-        bitmask_size -= shift;
+        bitmask_size += shift;
         shift = 0;
     }
 
