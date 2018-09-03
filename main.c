@@ -1,19 +1,35 @@
 
-#include "board.h"
+#include "minimax.h"
+
+void player_vs_cpu() {
+    Board* board = create_board();
+    char* input = malloc(sizeof(char) * 3);
+    for(;;) {
+        print_board(board);
+        printf("Vez do humano\n");
+        fflush(stdout);
+        size_t size = 3;
+        getline(&input, &size, stdin);
+        char cy[] = {input[0], '\0'};
+        char cx[] = {input[1], '\0'};
+        int y = strtol(cy, NULL, BOARD_SIZE);
+        int x = strtol(cx, NULL, BOARD_SIZE);
+        if (play_board(board, x, y, player1)) {
+            printf("Você não pode jogar aí!\n");
+            fflush(stdout);
+        } else {
+            print_board(board);
+            printf("CPU pensando");
+            play_minimax(board, player2);
+        }
+    }
+}
 
 int main (void) {
     htable = generate_table(WIN_SIZE, VALUES);
 
-    Board* board = create_board();
-    play_board(board, 0, 0, 0x1);
-    print_board(board);
-    play_board(board, 0, 4, 0x2);
-    print_board(board);
-    play_board(board, 3, 7, 0x1);
-    print_board(board);
-    play_board(board, 13, 14, 0x2);
-    print_board(board);
-    play_board(board, 14, 14, 0x1);
+    player_vs_cpu();
 
     return 0;
 }
+

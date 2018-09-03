@@ -8,24 +8,17 @@
 
 int* htable;
 
-struct Board {
-    row_t* horizontal; // tabuleiro normal
-    row_t* vertical;   // tabuleiro transposto
-    row_t* descending; // diagonal cima-esquerda para baixo-direita
-    row_t* ascending;  // diagonal baixo-esquerda para cima-direita
-    int hval;          // valor heurístico
-    int size;          // dimensões
-};
-
 Board* create_board () {
     Board* board = malloc(sizeof(Board));
 
     board->horizontal = calloc(BOARD_SIZE, sizeof(row_t));
     board->vertical   = calloc(BOARD_SIZE, sizeof(row_t));
 
-    int diag_rows = BOARD_SIZE * 2 - 1; // quantidade de fileiras diagonais
-    board->descending = calloc(diag_rows, sizeof(row_t));
-    board->ascending  = calloc(diag_rows, sizeof(row_t));
+    // quantidade de fileiras diagonais
+    board->diag_rows = BOARD_SIZE * 2 - 1; 
+
+    board->descending = calloc(board->diag_rows, sizeof(row_t));
+    board->ascending  = calloc(board->diag_rows, sizeof(row_t));
     
     // sinalizar até onde vai cada fileira diagonal
 
@@ -33,7 +26,7 @@ Board* create_board () {
     int row_size = 1;
 
     int inc = 1;
-    for (int i = 0; i < diag_rows; i++) {
+    for (int i = 0; i < board->diag_rows; i++) {
         for (int j = 0; j < BOARD_SIZE - row_size; j++) {
             board->ascending[i]  |= (0x3 << (BOARD_SIZE-1) * 2) >> j * 2;
             board->descending[i] |= (0x3 << (BOARD_SIZE-1) * 2) >> j * 2;
@@ -46,6 +39,20 @@ Board* create_board () {
 
     board->hval = 0;
 
+    return board;
+}
+
+Board* copy_board (Board* other) {
+    Board* board = malloc(sizeof(Board));
+    *board = *other;
+    board->horizontal = malloc(BOARD_SIZE * sizeof(row_t));
+    board->vertical = malloc(BOARD_SIZE * sizeof(row_t));
+    board->ascending = malloc(board->diag_rows * sizeof(row_t));
+    board->descending = malloc(board->diag_rows * sizeof(row_t));
+    memcpy(board->horizontal, other->horizontal, BOARD_SIZE * sizeof(row_t));
+    memcpy(board->vertical, other->vertical, BOARD_SIZE * sizeof(row_t));
+    memcpy(board->ascending, other->ascending, board->diag_rows * sizeof(row_t));
+    memcpy(board->descending, other->descending, board->diag_rows * sizeof(row_t));
     return board;
 }
 
@@ -73,7 +80,12 @@ int play_row (row_t* row, int pos, int piece) {
     int prev_hval = htable[select_affected(*row, pos)];
     // adiciona peça
     // obs: se estiver fora do tabuleiro (11), continua fora (11)
-    *row |= piece << (2 * pos); 
+    // se for 00, apaga
+    if (piece) {
+        *row |= piece << 2 * pos; 
+    } else {
+        *row &= ~(0x3 << 2 * pos);
+    }
     return htable[select_affected(*row, pos)] - prev_hval;
 }
 
@@ -86,11 +98,16 @@ int play_orientation (row_t* row, int x, int y, int piece) {
     return play_row(&row[y], x, piece);
 }
 
-void play_board (Board* board, int x, int y, int piece) {
+int play_board (Board* board, int x, int y, int piece) {
     /*
      * Joga uma peça no tabuleiro.
+     * Se peça for empty, remove peça
      * x, y é a posição relativa ao tabuleiro (orientação horizontal)
+     * retorna 1 se não é possível jogar em x, y.
      */
+    if (((board->horizontal[y] >> x * 2) & 0x3) && piece) {
+        return 1;
+    }
     board->hval += play_orientation(board->horizontal, x, y,   piece);
     board->hval += play_orientation(board->vertical,   y, x,   piece);
     board->hval += play_orientation(
@@ -105,6 +122,7 @@ void play_board (Board* board, int x, int y, int piece) {
             BOARD_SIZE-1-x+y,
             piece
     );
+    return 0;
 }
 
 int utility (Board* board) {
@@ -120,7 +138,13 @@ int utility (Board* board) {
 #ifdef DISPLAY
 
 void print_board (Board* board) {
+    printf("  ");
     for (int i = 0; i < BOARD_SIZE; i++) {
+        printf("%X ", i);
+    }
+    printf("\n");
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        printf("%X ", i);
         for (int j = 0; j < BOARD_SIZE; j++) {
             int piece = (board->horizontal[i] >> (j*2)) & 0x3;
             switch (piece) {
@@ -144,6 +168,7 @@ void print_board (Board* board) {
         printf("\n");
     }
     printf("hval: %d\n", board->hval);
+    fflush(stdout);
 }
 
 #endif
