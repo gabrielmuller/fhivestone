@@ -13,8 +13,8 @@ int play_minimax (Board* board, int player) {
 
     Board* sim_board = copy_board(board);
     int depth = DEPTH;
-    int alpha = -9999999;
-    int beta = 9999999;
+    int alpha = -10000000;
+    int beta = 10000000;
     int value;
     int minimizing = player == player2;
     int (*best)(int, int) = minimizing ? &min : &max;
@@ -23,8 +23,8 @@ int play_minimax (Board* board, int player) {
     value *= minimizing ? 1 : -1;
     int best_x = 0;
     int best_y = 0;
-    for (int x = 0; x < 15; x++) {
-        for (int y = 0; y < 15; y++) {
+    for (int x = 0; x < 7; x++) {
+        for (int y = 0; y < 7; y++) {
             // se peça já foi jogada aqui ignora
             if (play_board(sim_board, x, y, player)) {
                 continue;
@@ -40,10 +40,10 @@ int play_minimax (Board* board, int player) {
                 value = new_value;
             }
             *ab = (*best)(*ab, value);
-            if (alpha >= beta) break;
             play_board(sim_board, x, y, empty);
             printf(".");
             fflush(stdout);
+            if (alpha >= beta) goto end;
         }
     }
 
@@ -52,6 +52,7 @@ int play_minimax (Board* board, int player) {
     printf("Melhor valor previsto: %d\n", value);
 #endif
 
+    end:
     play_board(board, best_x, best_y, player);
     return value;
 }
@@ -71,15 +72,15 @@ int minimax (Board* board, int depth, int alpha, int beta, int minimizing) {
     int* ab = minimizing ? &beta : &alpha;
     value = 9999999;
     value *= minimizing ? 1 : -1;
-    for (int x = 0; x < 15; x++) {
-        for (int y = 0; y < 15; y++) {
+    for (int x = 0; x < 7; x++) {
+        for (int y = 0; y < 7; y++) {
             if (play_board(board, x, y, player)){
                 continue;
             }
             value = (*best)(value, minimax(board, depth-1, alpha, beta, !minimizing));
             *ab = (*best)(*ab, value);
-            if (alpha >= beta) break;
             play_board(board, x, y, empty);
+            if (alpha >= beta) return value;
         }
     }
     return value;
