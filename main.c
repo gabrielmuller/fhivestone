@@ -1,6 +1,15 @@
 
 #include "minimax.h"
 
+void cpu_vs_cpu () {
+    Board* board = create_board();
+    while (!utility(board)) {
+        play_minimax(board, player1);
+        play_minimax(board, player2);
+        print_board(board);
+    }
+}
+
 void player_vs_cpu() {
     Board* board = create_board();
     char* input = malloc(sizeof(char) * 3);
@@ -29,6 +38,7 @@ int main (void) {
     htable = generate_table(WIN_SIZE, VALUES);
 
     player_vs_cpu();
+    //cpu_vs_cpu();
 
     return 0;
 }
