@@ -2,6 +2,8 @@
 #define BOARD_H
 
 #include "heuristics.h"
+#include <stdio.h>
+#include <string.h>
 
 #define DISPLAY
 #define WIN 900000

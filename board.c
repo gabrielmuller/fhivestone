@@ -4,7 +4,6 @@
  * Mantém uma cópia para cada orientação
  */
 #include "board.h"
-#include <stdio.h>
 
 int* htable;
 
