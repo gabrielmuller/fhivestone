@@ -18,6 +18,8 @@ Board* create_board () {
 
     board->descending = calloc(board->diag_rows, sizeof(row_t));
     board->ascending  = calloc(board->diag_rows, sizeof(row_t));
+    board->last_x = BOARD_SIZE/2;
+    board->last_y = BOARD_SIZE/2;
     
     // sinalizar até onde vai cada fileira diagonal
 
@@ -44,14 +46,17 @@ Board* create_board () {
 Board* copy_board (Board* other) {
     Board* board = malloc(sizeof(Board));
     *board = *other;
+
     board->horizontal = malloc(BOARD_SIZE * sizeof(row_t));
     board->vertical = malloc(BOARD_SIZE * sizeof(row_t));
     board->ascending = malloc(board->diag_rows * sizeof(row_t));
     board->descending = malloc(board->diag_rows * sizeof(row_t));
+
     memcpy(board->horizontal, other->horizontal, BOARD_SIZE * sizeof(row_t));
     memcpy(board->vertical, other->vertical, BOARD_SIZE * sizeof(row_t));
     memcpy(board->ascending, other->ascending, board->diag_rows * sizeof(row_t));
     memcpy(board->descending, other->descending, board->diag_rows * sizeof(row_t));
+
     return board;
 }
 
@@ -121,6 +126,8 @@ int play_board (Board* board, int x, int y, int piece) {
             BOARD_SIZE-1-x+y,
             piece
     );
+    board->last_x = x;
+    board->last_y = y;
     return 0;
 }
 

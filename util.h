@@ -6,7 +6,10 @@
 #define BOARD_SIZE 15
 #define WIN_SIZE 5
 #define SPACE_RAUDIS 2
-#define DEPTH 7
+
+#ifndef DEPTH
+#define DEPTH 5
+#endif
 
 static int VALUES[] = {1, 10, 100, 1000, 1000000};
 static int BITMASKS[] = {0x3ffff, 0x3fffc, 0x3fff0, 0x3ffc0, 0x3ff00,

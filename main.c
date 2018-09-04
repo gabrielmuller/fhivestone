@@ -13,7 +13,8 @@ void cpu_vs_cpu () {
 void player_vs_cpu() {
     Board* board = create_board();
     char* input = malloc(sizeof(char) * 3);
-    for(;;) {
+    int who_won;
+    while (who_won = !utility(board)) {
         print_board(board);
         printf("Vez do humano\n");
         fflush(stdout);
@@ -32,13 +33,20 @@ void player_vs_cpu() {
             play_minimax(board, player2);
         }
     }
+    printf("---------- \
+            %s ganhou!\n \
+            ----------",
+            who_won == player1 ? "Você" : "CPU");
 }
 
 int main (void) {
     htable = generate_table(WIN_SIZE, VALUES);
 
+#ifdef BENCHMARK
+    cpu_vs_cpu();
+    return 0;
+#endif
     player_vs_cpu();
-    //cpu_vs_cpu();
 
     return 0;
 }

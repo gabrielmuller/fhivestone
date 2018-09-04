@@ -16,6 +16,8 @@ typedef struct {
     int hval;          // valor heurístico
     int size;          // dimensões
     int diag_rows;
+    int last_x;
+    int last_y;
 } Board;
 
 extern int* htable;
