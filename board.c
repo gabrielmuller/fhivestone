@@ -108,9 +108,10 @@ int play_board (Board* board, int x, int y, int piece) {
      * Se peça for empty, remove peça
      * x, y é a posição relativa ao tabuleiro (orientação horizontal)
      * retorna 1 se não é possível jogar em x, y.
+     * retorna 2 se jogo já acabou.
      */
     if (((board->horizontal[y] >> x * 2) & 0x3) && piece) {
-        return 1;
+        return -1;
     }
     board->hval += play_orientation(board->horizontal, x, y,   piece);
     board->hval += play_orientation(board->vertical,   y, x,   piece);
@@ -128,17 +129,64 @@ int play_board (Board* board, int x, int y, int piece) {
     );
     board->last_x = x;
     board->last_y = y;
-    return 0;
+
+
+    return utility(board);
 }
 
 int utility (Board* board) {
     if (board->hval > WIN) {
         return player1;
-    }
-    else if (board->hval < -WIN) {
+    } else if (board->hval < -WIN) {
         return player2;
     }
     return empty;
+}
+
+int compare_dec (const void* a, const void* b) {
+    return ((Pos*)b)->hval - ((Pos*)a)->hval;
+}
+
+int compare_inc (const void* a, const void* b) {
+    return ((Pos*)a)->hval - ((Pos*)b)->hval;
+}
+
+int get_length (Pos* list) {
+    return list[0].hval;
+}
+
+Pos* sorted_plays (Board* board, int player) {
+    /*
+     * Retorna array com todas as jogadas em ordem decrescente de valor
+     * heurístico
+     *
+     * Primeiro elemento do retorno armazena o tamanho real do array
+     */
+    Pos* list = malloc(sizeof(Pos) * (BOARD_SIZE * BOARD_SIZE + 1));
+    int length = 0;
+    for (int x = 0; x < BOARD_SIZE; x++) {
+        for (int y = 0; y < BOARD_SIZE; y++) {
+            if (play_board(board, x, y, player)) {
+                // Jogada inválida, não coloca no array
+                continue;
+            }
+            length++;
+            list[length].x = x;
+            list[length].y = y;
+            list[length].hval = board->hval;
+
+            // Restaura tabuleiro
+            play_board(board, x, y, empty);
+        } 
+    } 
+    // Ordena lista
+    list[0].hval = length;
+    if (player == player1) {
+        qsort(list + 1, length, sizeof(Pos), compare_dec);
+    } else {
+        qsort(list + 1, length, sizeof(Pos), compare_inc);
+    }
+    return list;
 }
 
 #ifdef DISPLAY

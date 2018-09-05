@@ -20,6 +20,12 @@ typedef struct {
     int last_y;
 } Board;
 
+typedef struct {
+    int x;
+    int y;
+    int hval;
+} Pos;
+
 extern int* htable;
 Board* create_board ();
 Board* copy_board (Board* other);
@@ -29,6 +35,8 @@ int play_orientation (row_t* row, int x, int y, int piece);
 int min (int x, int y);
 int play_board (Board* board, int x, int y, int piece);
 int utility (Board* board);
+int get_length (Pos* list);
+Pos* sorted_plays (Board* board, int player);
 
 #ifdef DISPLAY
 void print_board (Board* board);

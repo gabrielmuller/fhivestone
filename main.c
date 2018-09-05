@@ -3,9 +3,10 @@
 
 void cpu_vs_cpu () {
     Board* board = create_board();
-    while (!utility(board)) {
-        play_minimax(board, player1);
-        play_minimax(board, player2);
+    play_board(board, 7, 7, player2);
+    for (int is_p1 = 1; !utility(board); is_p1 = !is_p1) {
+        int player = is_p1 ? player1 : player2;
+        play_minimax(board, player);
         print_board(board);
     }
 }
@@ -33,9 +34,9 @@ void player_vs_cpu() {
             play_minimax(board, player2);
         }
     }
-    printf("---------- \
+    printf("----------\n \
             %s ganhou!\n \
-            ----------",
+            ----------\n",
             who_won == player1 ? "Você" : "CPU");
 }
 
@@ -46,7 +47,11 @@ int main (void) {
     cpu_vs_cpu();
     return 0;
 #endif
-    player_vs_cpu();
+    //player_vs_cpu();
+    Board* board = create_board();
+    play_board(board, 7, 7, player1);
+    play_board(board, 7, 8, player2);
+    Pos* pos = sorted_plays(board, player1);
 
     return 0;
 }
