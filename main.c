@@ -15,7 +15,7 @@ void player_vs_cpu() {
     Board* board = create_board();
     char* input = malloc(sizeof(char) * 3);
     int who_won;
-    while (who_won = !utility(board)) {
+    for (;;) {
         print_board(board);
         printf("Vez do humano\n");
         fflush(stdout);
@@ -25,7 +25,7 @@ void player_vs_cpu() {
         char cx[] = {input[1], '\0'};
         int y = strtol(cy, NULL, BOARD_SIZE);
         int x = strtol(cx, NULL, BOARD_SIZE);
-        if (play_board(board, x, y, player1)) {
+        if (play_board(board, x, y, player1) == invalid) {
             printf("Você não pode jogar aí!\n");
             fflush(stdout);
         } else {
@@ -47,12 +47,7 @@ int main (void) {
     cpu_vs_cpu();
     return 0;
 #endif
-    //player_vs_cpu();
-    Board* board = create_board();
-    play_board(board, 7, 7, player1);
-    play_board(board, 7, 8, player2);
-    Pos* pos = malloc(sizeof(Pos) * (BOARD_SIZE*BOARD_SIZE+1));
-    sorted_plays(pos, board, player1);
+    player_vs_cpu();
 
     return 0;
 }

@@ -28,25 +28,22 @@ int play_minimax (Board* board, int player) {
     int last_y = board->last_y;
 
     // Cria fila ordenada de posições a testar
-    Pos* queue = malloc(sizeof(Pos) * (BOARD_SIZE*BOARD_SIZE+1));
+    Pos* queue = malloc(sizeof(Pos) * (BOARD_SIZE*BOARD_SIZE+1) * depth);
     sorted_plays(queue, sim_board, player);
     int length = get_length(queue);
     queue++; // primeiro elemento é length, desconsidera
 
-    //for (int i = 0; i < length; i++) {
-    for (int x = 0; x < BOARD_SIZE; x++) {
-    for (int y = 0; y < BOARD_SIZE; y++) {
-        /*
+    for (int i = 0; i < length; i++) {
         int x = queue[i].x;
         int y = queue[i].y;
-        */
 
         if (play_board(sim_board, x, y, player) == invalid) {
             continue;
         }
 
         int new_value = (*best)(value,
-                minimax(sim_board, depth-1, alpha, beta, !minimizing)
+                minimax(sim_board, queue + BOARD_SIZE*BOARD_SIZE,
+                        depth-1, alpha, beta, !minimizing)
         );
         // apenas a camada mais superficial do minimax precisa
         // retornar uma posição
@@ -60,7 +57,7 @@ int play_minimax (Board* board, int player) {
         fflush(stdout);
         *ab = (*best)(*ab, value);
         if (alpha >= beta) break;
-    }}
+    }
 
 #ifdef STATS
     printf("\n");
@@ -72,7 +69,7 @@ int play_minimax (Board* board, int player) {
     return value;
 }
 
-int minimax (Board* board, int depth, int alpha, int beta, int minimizing) {
+int minimax (Board* board, Pos* queue, int depth, int alpha, int beta, int minimizing) {
     if (!depth) {
         return board->hval;
     }
@@ -88,14 +85,15 @@ int minimax (Board* board, int depth, int alpha, int beta, int minimizing) {
     value = 9999999;
     value *= minimizing ? 1 : -1;
 
-    /*
     if (depth < 2) {
         for (int x = 0; x < BOARD_SIZE; x++) {
             for (int y = 0; y < BOARD_SIZE; y++) {
-                value = (*best)(value, minimax(board, depth-1, alpha, beta, !minimizing));
-                if (play_board(board, x, y, empty)) {
+                if (play_board(board, x, y, player) == invalid) {
                     continue;
                 }
+
+                value = (*best)(value, minimax(board, queue + BOARD_SIZE*BOARD_SIZE, depth-1, alpha, beta, !minimizing));
+                play_board(board, x, y, empty);
 
                 *ab = (*best)(*ab, value);
                 if (alpha >= beta) return value;
@@ -104,8 +102,7 @@ int minimax (Board* board, int depth, int alpha, int beta, int minimizing) {
         return value;
     }
                 
-    // Cria fila ordenada de posições a testar
-    Pos* queue = sorted_plays(board, player);
+    sorted_plays(queue, board, player);
     int length = get_length(queue);
     queue++; // primeiro elemento é length, desconsidera
 
@@ -113,24 +110,12 @@ int minimax (Board* board, int depth, int alpha, int beta, int minimizing) {
         int x = queue[i].x;
         int y = queue[i].y;
 
-        value = (*best)(value, minimax(board, depth-1, alpha, beta, !minimizing));
+        play_board(board, x, y, player);
+        value = (*best)(value, minimax(board, queue + BOARD_SIZE*BOARD_SIZE, depth-1, alpha, beta, !minimizing));
         play_board(board, x, y, empty);
 
         *ab = (*best)(*ab, value);
         if (alpha >= beta) return value;
-    }*/
-    for (int x = 0; x < BOARD_SIZE; x++) {
-        for (int y = 0; y < BOARD_SIZE; y++) {
-            if (play_board(board, x, y, player) == invalid) {
-                continue;
-            }
-
-            value = (*best)(value, minimax(board, depth-1, alpha, beta, !minimizing));
-            play_board(board, x, y, empty);
-
-            *ab = (*best)(*ab, value);
-            if (alpha >= beta) return value;
-        }
     }
     return value;
 }

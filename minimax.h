@@ -4,5 +4,5 @@
 #include "board.h"
 
 int play_minimax (Board* board, int player);
-int minimax (Board* board, int depth, int alpha, int beta, int minimizing);
+int minimax (Board* board, Pos* queue, int depth, int alpha, int beta, int minimizing);
 #endif

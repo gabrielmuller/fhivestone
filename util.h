@@ -8,7 +8,7 @@
 #define SPACE_RAUDIS 2
 
 #ifndef DEPTH
-#define DEPTH 4
+#define DEPTH 3
 #endif
 
 static int VALUES[] = {1, 10, 100, 1000, 1000000};
