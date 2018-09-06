@@ -6,13 +6,6 @@ int counter;
 #endif
 
 
-int spiral (int i, int offset) {
-    if (i % 2) {
-        return (i/2 + offset + 1);
-    }
-    return (offset - i/2);
-}
-
 int play_minimax (Board* board, int player) {
     
 #ifdef STATS
@@ -35,30 +28,21 @@ int play_minimax (Board* board, int player) {
     int last_y = board->last_y;
 
     // Cria fila ordenada de posições a testar
-    Pos* queue = sorted_plays(sim_board, player);
+    Pos* queue = malloc(sizeof(Pos) * (BOARD_SIZE*BOARD_SIZE+1));
+    sorted_plays(queue, sim_board, player);
     int length = get_length(queue);
     queue++; // primeiro elemento é length, desconsidera
 
-    for (int i = 0; i < length; i++) {
+    //for (int i = 0; i < length; i++) {
+    for (int x = 0; x < BOARD_SIZE; x++) {
+    for (int y = 0; y < BOARD_SIZE; y++) {
+        /*
         int x = queue[i].x;
         int y = queue[i].y;
+        */
 
-        int r;        
-        switch (r = play_board(sim_board, x, y, player)) {
-            case 0:
-                break;
-            case -1:
-                continue;
-            default:
-                if (r == player) {
-                    value = board->hval;
-                    play_board(sim_board, x, y, empty);
-                    best_x = x;
-                    best_y = y;
-                    goto hell;
-                }
-                play_board(sim_board, x, y, empty);
-                continue;
+        if (play_board(sim_board, x, y, player) == invalid) {
+            continue;
         }
 
         int new_value = (*best)(value,
@@ -72,15 +56,14 @@ int play_minimax (Board* board, int player) {
             value = new_value;
         }
         play_board(sim_board, x, y, empty);
-        printf("\r%d", (i*100)/length);
+        //printf("\r%d", (i*100)/length);
         fflush(stdout);
-
         *ab = (*best)(*ab, value);
         if (alpha >= beta) break;
-    }
+    }}
 
-    hell:
 #ifdef STATS
+    printf("\n");
     printf("Tabuleiros analisados: %d\n", counter);
     printf("Melhor valor previsto: %d\n", value);
 #endif
@@ -105,26 +88,14 @@ int minimax (Board* board, int depth, int alpha, int beta, int minimizing) {
     value = 9999999;
     value *= minimizing ? 1 : -1;
 
+    /*
     if (depth < 2) {
         for (int x = 0; x < BOARD_SIZE; x++) {
             for (int y = 0; y < BOARD_SIZE; y++) {
-                int r;        
-                switch (r = play_board(board, x, y, player)) {
-                    case 0:
-                        break;
-                    case -1:
-                        continue;
-                    default:
-                        if (r == player) {
-                            value = board->hval;
-                            play_board(board, x, y, empty);
-                            return value;
-                        }
-                        play_board(board, x, y, empty);
-                        continue;
-                }
                 value = (*best)(value, minimax(board, depth-1, alpha, beta, !minimizing));
-                play_board(board, x, y, empty);
+                if (play_board(board, x, y, empty)) {
+                    continue;
+                }
 
                 *ab = (*best)(*ab, value);
                 if (alpha >= beta) return value;
@@ -142,27 +113,24 @@ int minimax (Board* board, int depth, int alpha, int beta, int minimizing) {
         int x = queue[i].x;
         int y = queue[i].y;
 
-        int r;        
-        switch (r = play_board(board, x, y, player)) {
-            case 0:
-                break;
-            case -1:
-                continue;
-            default:
-                if (r == player) {
-                    value = board->hval;
-                    play_board(board, x, y, empty);
-                    return value;
-                }
-                play_board(board, x, y, empty);
-                continue;
-        }
-
         value = (*best)(value, minimax(board, depth-1, alpha, beta, !minimizing));
         play_board(board, x, y, empty);
 
         *ab = (*best)(*ab, value);
         if (alpha >= beta) return value;
+    }*/
+    for (int x = 0; x < BOARD_SIZE; x++) {
+        for (int y = 0; y < BOARD_SIZE; y++) {
+            if (play_board(board, x, y, player) == invalid) {
+                continue;
+            }
+
+            value = (*best)(value, minimax(board, depth-1, alpha, beta, !minimizing));
+            play_board(board, x, y, empty);
+
+            *ab = (*best)(*ab, value);
+            if (alpha >= beta) return value;
+        }
     }
     return value;
 }

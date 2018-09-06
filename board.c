@@ -111,7 +111,7 @@ int play_board (Board* board, int x, int y, int piece) {
      * retorna 2 se jogo já acabou.
      */
     if (((board->horizontal[y] >> x * 2) & 0x3) && piece) {
-        return -1;
+        return invalid;
     }
     board->hval += play_orientation(board->horizontal, x, y,   piece);
     board->hval += play_orientation(board->vertical,   y, x,   piece);
@@ -155,38 +155,36 @@ int get_length (Pos* list) {
     return list[0].hval;
 }
 
-Pos* sorted_plays (Board* board, int player) {
+void sorted_plays (Pos* play_buffer, Board* board, int player) {
     /*
      * Retorna array com todas as jogadas em ordem decrescente de valor
      * heurístico
      *
      * Primeiro elemento do retorno armazena o tamanho real do array
      */
-    Pos* list = malloc(sizeof(Pos) * (BOARD_SIZE * BOARD_SIZE + 1));
     int length = 0;
     for (int x = 0; x < BOARD_SIZE; x++) {
         for (int y = 0; y < BOARD_SIZE; y++) {
-            if (play_board(board, x, y, player)) {
+            if (play_board(board, x, y, player) == invalid) { 
                 // Jogada inválida, não coloca no array
                 continue;
             }
             length++;
-            list[length].x = x;
-            list[length].y = y;
-            list[length].hval = board->hval;
+            play_buffer[length].x = x;
+            play_buffer[length].y = y;
+            play_buffer[length].hval = board->hval;
 
             // Restaura tabuleiro
             play_board(board, x, y, empty);
         } 
     } 
     // Ordena lista
-    list[0].hval = length;
+    play_buffer[0].hval = length;
     if (player == player1) {
-        qsort(list + 1, length, sizeof(Pos), compare_dec);
+        qsort(play_buffer+1, length, sizeof(Pos), compare_dec);
     } else {
-        qsort(list + 1, length, sizeof(Pos), compare_inc);
+        qsort(play_buffer+1, length, sizeof(Pos), compare_inc);
     }
-    return list;
 }
 
 #ifdef DISPLAY

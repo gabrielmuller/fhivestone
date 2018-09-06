@@ -51,7 +51,8 @@ int main (void) {
     Board* board = create_board();
     play_board(board, 7, 7, player1);
     play_board(board, 7, 8, player2);
-    Pos* pos = sorted_plays(board, player1);
+    Pos* pos = malloc(sizeof(Pos) * (BOARD_SIZE*BOARD_SIZE+1));
+    sorted_plays(pos, board, player1);
 
     return 0;
 }

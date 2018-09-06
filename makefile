@@ -3,8 +3,13 @@ all:
 	./fhive.o
 
 debug:
+	gcc  -g -O0 *.c -o fhive.o
+	gdb fhive.o --tui
+
+dbp:
 	gcc  -g -O0 *.c -o fhive.o -DBENCHMARK
 	gdb fhive.o --tui
+	
 
 profile:
 	gcc  -pg -O3 *.c -o fhive.o -DBENCHMARK

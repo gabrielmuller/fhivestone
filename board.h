@@ -36,7 +36,7 @@ int min (int x, int y);
 int play_board (Board* board, int x, int y, int piece);
 int utility (Board* board);
 int get_length (Pos* list);
-Pos* sorted_plays (Board* board, int player);
+void sorted_plays (Pos* play_buffer, Board* board, int player);
 
 #ifdef DISPLAY
 void print_board (Board* board);
