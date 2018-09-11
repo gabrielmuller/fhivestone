@@ -89,6 +89,7 @@ int* generate_table (int small_length, int* values) {
             int small = (big >> 2 * small_offset) & 0x3FF; // seleciona 5 espaços (10 bits) dos 9
             int* pieces = bits_to_array(small, small_length);
             table[big] += evaluate_sequence(pieces, small_length, values);
+            free(pieces);
         }
      }
 

@@ -8,6 +8,10 @@
 int* htable;
 
 Board* create_board () {
+    /*
+     * Aloca memória e inicializa um tabuleiro novo.
+     */
+
     Board* board = malloc(sizeof(Board));
 
     board->horizontal = calloc(BOARD_SIZE, sizeof(row_t));
@@ -18,8 +22,6 @@ Board* create_board () {
 
     board->descending = calloc(board->diag_rows, sizeof(row_t));
     board->ascending  = calloc(board->diag_rows, sizeof(row_t));
-    board->last_x = BOARD_SIZE/2;
-    board->last_y = BOARD_SIZE/2;
     
     // sinalizar até onde vai cada fileira diagonal
 
@@ -43,7 +45,24 @@ Board* create_board () {
     return board;
 }
 
+void free_board (Board* board) {
+    /*
+     * Libera tabuleiro da memória.
+     */
+
+    free(board->horizontal);
+    free(board->vertical);
+    free(board->descending);
+    free(board->ascending);
+    free(board);
+}
+
+
 Board* copy_board (Board* other) {
+    /*
+     * Cria uma cópia do tabuleiro *other
+     */
+
     Board* board = malloc(sizeof(Board));
     *board = *other;
 
@@ -52,19 +71,32 @@ Board* copy_board (Board* other) {
     board->ascending = malloc(board->diag_rows * sizeof(row_t));
     board->descending = malloc(board->diag_rows * sizeof(row_t));
 
-    memcpy(board->horizontal, other->horizontal, BOARD_SIZE * sizeof(row_t));
-    memcpy(board->vertical, other->vertical, BOARD_SIZE * sizeof(row_t));
-    memcpy(board->ascending, other->ascending, board->diag_rows * sizeof(row_t));
-    memcpy(board->descending, other->descending, board->diag_rows * sizeof(row_t));
+    memcpy(board->horizontal,
+           other->horizontal,
+           BOARD_SIZE * sizeof(row_t)
+           );
+    memcpy(board->vertical,
+           other->vertical,
+           BOARD_SIZE * sizeof(row_t)
+           );
+    memcpy(board->ascending,
+           other->ascending,
+           board->diag_rows * sizeof(row_t)
+           );
+    memcpy(board->descending,
+           other->descending,
+           board->diag_rows * sizeof(row_t)
+           );
 
     return board;
 }
 
 int select_affected(row_t row, int pos) {
     /*
-     * Seleciona as peças da fileira que são
-     * afetadas por uma jogada em pos.
+     * Seleciona os espaços da fileira row que têm valor heurístico
+     * afetado por uma jogada em pos.
      */
+
     int start = pos - WIN_SIZE + 1;
     int end = pos + WIN_SIZE;
     start = start < 0 ? 0 : start;
@@ -81,6 +113,7 @@ int play_row (row_t* row, int pos, int piece) {
      * pos é a posição relativa à fileira.
      * retorna variação no valor heurístico.
      */
+
     int prev_hval = htable[select_affected(*row, pos)];
     // adiciona peça
     // obs: se estiver fora do tabuleiro (11), continua fora (11)
@@ -127,14 +160,22 @@ int play_board (Board* board, int x, int y, int piece) {
             BOARD_SIZE-1-x+y,
             piece
     );
-    board->last_x = x;
-    board->last_y = y;
-
 
     return utility(board);
 }
 
+int play_middle (Board* board, int player) {
+    /*
+     * Função de utilidade, faz uma jogada no centro do tabuleiro.
+     */
+
+    play_board(board, BOARD_SIZE/2, BOARD_SIZE/2, player);
+}
+
 int utility (Board* board) {
+    /*
+     * Retorna jogador que ganhou, ou zero se ninguém ganhou ainda.
+     */
     if (board->hval > WIN) {
         return player1;
     } else if (board->hval < -WIN) {
@@ -144,14 +185,25 @@ int utility (Board* board) {
 }
 
 int compare_dec (const void* a, const void* b) {
+    /*
+     * Compara jogadas em ordem decrescente.
+     * Usado com o qsort.
+     */
     return ((Pos*)b)->hval - ((Pos*)a)->hval;
 }
 
 int compare_inc (const void* a, const void* b) {
+    /*
+     * Compara jogadas em ordem crescente.
+     * Usado com o qsort.
+     */
     return ((Pos*)a)->hval - ((Pos*)b)->hval;
 }
 
 int get_length (Pos* list) {
+    /*
+     * Tamanho da lista é armazenado no primeiro elemento.
+     */
     return list[0].hval;
 }
 
@@ -162,6 +214,7 @@ void sorted_plays (Pos* play_buffer, Board* board, int player) {
      *
      * Primeiro elemento do retorno armazena o tamanho real do array
      */
+
     int length = 0;
     for (int x = 0; x < BOARD_SIZE; x++) {
         for (int y = 0; y < BOARD_SIZE; y++) {
@@ -187,40 +240,48 @@ void sorted_plays (Pos* play_buffer, Board* board, int player) {
     }
 }
 
-#ifdef DISPLAY
-
 void print_board (Board* board) {
+    /*
+     * Mostra o tabuleiro no stdout.
+     */
+    printf("Valor heurístico: %d\n", board->hval);
     printf("  ");
+
+    // printa fileira 0 1 2 3 4 5 ...
     for (int i = 0; i < BOARD_SIZE; i++) {
-        printf("%X ", i);
+        printf(" %X", i);
     }
+
     printf("\n");
     for (int i = 0; i < BOARD_SIZE; i++) {
         printf("%X ", i);
+        int next_is_space = 0;
         for (int j = 0; j < BOARD_SIZE; j++) {
             int piece = (board->horizontal[i] >> (j*2)) & 0x3;
             switch (piece) {
                 case player1:
-                    printf("O");
+                    printf(" ○");
+                    next_is_space = 1;
                     break;
                 case player2:
-                    printf("X");
+                    printf(" ●");
+                    next_is_space = 1;
                     break;
                 case empty:
-                    printf("_");
+                    if (next_is_space) {
+                        printf(" ┼");
+                        next_is_space = 0;
+                    } else {
+                        printf("╌┼");
+                    }
                     break;
                 case offboard:
-                    printf("E");
+                    printf(" E");
                     break;
                 default:
                     printf("%X", piece);
             }
-            printf(" ");
         }
         printf("\n");
     }
-    printf("hval: %d\n", board->hval);
-    fflush(stdout);
 }
-
-#endif
