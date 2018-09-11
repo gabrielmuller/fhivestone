@@ -10,7 +10,7 @@
 
 #define DEFAULT_EFFORT 25
 #define EFFORT_INC 6
-#define DEFAULT_DEPTH 8
+#define DEFAULT_DEPTH 7
 
 static int VALUES[] = {1, 10, 100, 10000, 1000000};
 static int BITMASKS[] = {0x3ffff, 0x3fffc, 0x3fff0, 0x3ffc0, 0x3ff00,

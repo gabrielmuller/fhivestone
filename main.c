@@ -81,6 +81,7 @@ void player_vs_cpu (int cpu_starts, int effort, int depth) {
         effort += EFFORT_INC * 2;
     }
 
+    print_board(board);
     if (who_won == invalid) {
         printf("Empate!\n");
     }
