@@ -2,7 +2,7 @@
 
 ## Instalação e execução
 
-Para executar da forma mais simples, execute:
+Para executar da forma mais simples, use:
 
     make
     ./fhive
