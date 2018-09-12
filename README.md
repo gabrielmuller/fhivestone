@@ -29,6 +29,7 @@ Conceitualmente, o valor heurístico de um tabuleiro é a soma dos valores
 atribuídos a todas subsequências sobrepostas do tabuleiro. Sequências com
 peças de tipos diferentes e sequências vazias não pontuam, enquanto sequências
 com peças de apenas um tipo pontuam de acordo com a quantidade de peças.
+
     PEÇAS    VALOR
     1        1
     2        10
@@ -38,6 +39,7 @@ com peças de apenas um tipo pontuam de acordo com a quantidade de peças.
 
 Por exemplo, considere a primeira jogada de uma partida no meio do tabuleiro.
 Analisando uma fileira, temos as seguintes subsequências:
+
     _ _ _ _ O _ _ _ _
 
     ~ ~ ~ ~ ~           1
@@ -59,12 +61,14 @@ deve haver ao menos uma subsequência com 5 em seguida.
 ### Tabuleiro
 O tabuleiro é armazenado com um inteiro de 32 bits por fileira, com cada espaço 
 do tabuleiro representado por 2 bits:
+
     vazio:             00
     jogador 1:         01 
     jogador 2:         10
     fora do tabuleiro: 11
 
 Exemplo de fileira:
+
        F  _  _  _  O  X  _  _  X  X  X  X  O  _  _  _  
        XX 00 00 00 01 10 00 00 10 10 10 10 01 00 00 00
     0x   0     0     6     0     A     A     4     0
@@ -136,6 +140,7 @@ Retorna o valor heurístico do tabuleiro.
 #### Demais camadas
 
 Funciona, de forma simples, da seguinte forma:
+
     fila = jogadas ordenadas por melhor valor heurístico
     para os primeiros effort elementos da fila:
         jogue no tabuleiro de simulação
