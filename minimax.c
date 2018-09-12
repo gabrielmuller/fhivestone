@@ -9,17 +9,17 @@ int play_minimax (Board* board, int player, int effort, int depth) {
 
 
     // quantos tabuleiros foram analisados
-    unsigned long long int shared_counter = 0; 
+    counter_t shared_counter = 0; 
     
     int minimizing = player == player2; // está minimizando?
 
     // melhor valor heurístico achado
-    int value = 9999999;
-    value *= minimizing ? 1 : -1;
+    int best_value = 9999999;
+    best_value *= minimizing ? 1 : -1;
 
     // posição com melhor valor heurístico
-    int best_x = -1;
-    int best_y = -1;
+    int best_x = 0;
+    int best_y = 0;
 
     // usado para porcentagem
     int progress = 0;
@@ -35,58 +35,65 @@ int play_minimax (Board* board, int player, int effort, int depth) {
         // não sobrou nenhum espaço pra jogar
         return 1;
     }
+    int alpha = -100000000;
+    int beta = 100000000;
+
+    // qual valor alfa/beta será relevante
+    int* ab = minimizing ? &beta : &alpha;
+
+    // função que decide qual valor heurístico entre dois é o melhor
+    int (*best)(int, int) = minimizing ? &min : &max;
 
     #pragma omp parallel
     {
     // tabuleiro para simulação
     Board* sim_board = copy_board(board);
-    Pos* queue = malloc(sizeof(Pos)*(BOARD_SIZE*BOARD_SIZE+1)*(depth-1));
 
-    int alpha = -100000000;
-    int beta = 100000000;
+    // memória para as demais profundidades usarem como fila de prioridade
+    Pos* queue = malloc(sizeof(Pos)*(BOARD_SIZE*BOARD_SIZE+1)*(depth-2));
 
-    // função que decide qual valor heurístico entre dois é o melhor
-    int (*best)(int, int) = minimizing ? &min : &max;
-
-    // qual valor alfa/beta será relevante
-    int* ab = minimizing ? &beta : &alpha;
-
-    #pragma omp for schedule(dynamic, 1)
+    #pragma omp for schedule(dynamic, 2)
     for (int i = 0; i < length; i++) {
-        unsigned long long counter = 0;
-        printf("\r%d%%", (progress*100)/length);
+        counter_t counter = 0;
 
         int x = shared_queue[i+1].x;
         int y = shared_queue[i+1].y;
 
         play_board(sim_board, x, y, player);
 
-        int new_value = (*best)(value,
-                minimax(sim_board, queue, effort,
-                        depth-1, alpha, beta, !minimizing, &counter)
-        );
+        int hval = minimax(sim_board,
+                           queue,
+                           effort,
+                           depth-1,
+                           alpha,
+                           beta,
+                           !minimizing,
+                           &counter
+                           );
 
         #pragma omp critical
         {
-            if (new_value != value) {
+            int new_value = (*best)(best_value, hval);
+            if (new_value != best_value) {
                 best_x = x;
                 best_y = y;
-                value = new_value;
+                best_value = new_value;
             }
+            *ab = (*best)(*ab, best_value);
             progress++;
+            printf("\r%d%%", (progress*100)/length);
             shared_counter += counter;
         } // end critical
 
         play_board(sim_board, x, y, empty);
-        *ab = (*best)(*ab, value);
     }
+
     free(queue);
     free_board(sim_board);
 
     } // end parallel
-
     printf("\r\n\n\n");
-    printf("Caminhos analisados: %d\n", shared_counter);
+    printf("Caminhos analisados: %llu\n", shared_counter);
 
     free(shared_queue);
         
@@ -94,20 +101,29 @@ int play_minimax (Board* board, int player, int effort, int depth) {
     return 0;
 }
 
-int minimax (Board* board, Pos* queue, int effort, int depth, int alpha, int beta, int minimizing, unsigned long long int* counter) {
+int minimax (Board* board,
+             Pos* queue,
+             int effort,
+             int depth,
+             int alpha,
+             int beta,
+             int minimizing,
+             counter_t* counter
+             ) {
 
     if (!depth || utility(board) > 0) {
+        // se profundidade chegou ao limite ou alguém ganhou na simulação
         (*counter)++;
         return board->hval;
     }
 
 
-    int value;
+    int best_value;
     int player = minimizing ? player2 : player1;
     int (*best)(int, int) = minimizing ? &min : &max;
     int* ab = minimizing ? &beta : &alpha;
-    value = 900000;
-    value *= minimizing ? 1 : -1;
+    best_value = 900000;
+    best_value *= minimizing ? 1 : -1;
 
     if (depth < 2) {
         for (int x = 0; x < BOARD_SIZE; x++) {
@@ -116,14 +132,25 @@ int minimax (Board* board, Pos* queue, int effort, int depth, int alpha, int bet
                     continue;
                 }
 
-                value = (*best)(value, minimax(board, queue + BOARD_SIZE*BOARD_SIZE, effort, depth-1, alpha, beta, !minimizing, counter));
+                best_value = (*best)(best_value, minimax(
+                    board,
+                    queue + BOARD_SIZE*BOARD_SIZE,
+                    effort,
+                    depth-1,
+                    alpha,
+                    beta,
+                    !minimizing,
+                    counter
+                    )
+                );
+
                 play_board(board, x, y, empty);
 
-                *ab = (*best)(*ab, value);
-                if (alpha >= beta) return value;
+                *ab = (*best)(*ab, best_value);
+                if (alpha >= beta) return best_value;
             }
         }
-        return value;
+        return best_value;
     }
                 
     sorted_plays(queue, board, player);
@@ -134,11 +161,20 @@ int minimax (Board* board, Pos* queue, int effort, int depth, int alpha, int bet
         int y = queue[i+1].y;
 
         play_board(board, x, y, player);
-        value = (*best)(value, minimax(board, queue + BOARD_SIZE*BOARD_SIZE, effort, depth-1, alpha, beta, !minimizing, counter));
+        best_value = (*best)(best_value, minimax(
+            board,
+            queue + BOARD_SIZE*BOARD_SIZE,
+            effort,
+            depth-1,
+            alpha,
+            beta,
+            !minimizing,
+            counter)
+            );
         play_board(board, x, y, empty);
 
-        *ab = (*best)(*ab, value);
-        if (alpha >= beta) return value;
+        *ab = (*best)(*ab, best_value);
+        if (alpha >= beta) return best_value;
     }
-    return value;
+    return best_value;
 }
