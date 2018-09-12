@@ -3,25 +3,33 @@
 ## Instalação e execução
 
 Para executar da forma mais simples, execute:
+
     make
     ./fhive
 
-Outras opções do make:
-    make debug  # flags de debug
+Outra opção do make:
+
     make single # sem multithreading
 
 ### Parâmetros de execução
-``--autoplay``   CPU contra CPU
-``--complete``   desativa otimização do *effort*.
+
+* ``--autoplay``   CPU contra CPU
+
+* ``--complete``   desativa otimização do *effort*.
 
 Parâmetros de execução no modo humano vs CPU (padrão):
-``--effort N``   analisa as N melhores jogadas. Explicado adiante.
-``--depth N``    define nível de profundidade
-``--cpu-starts`` deixa CPU fazer a primeira jogada
+
+* ``--effort N``   analisa as N melhores jogadas. Explicado adiante.
+
+* ``--depth N``    define nível de profundidade
+
+* ``--cpu-starts`` deixa CPU fazer a primeira jogada
 
 Parâmetros de execução no modo CPU vs CPU (``--autoplay``):
-``--efforts N M``   parâmetro *effort* para CPU1 e CPU2
-``--depths N M``    profundidade para CPU1 e CPU2
+
+* ``--efforts N M``   parâmetro *effort* para CPU1 e CPU2
+
+* ``--depths N M``    profundidade para CPU1 e CPU2
 
 ## Conceito da heurística
 
